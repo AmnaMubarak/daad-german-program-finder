@@ -1,22 +1,34 @@
-# DAAD German Master's Programs Scraper
+# DAAD German Masters Finder
 
-A Python-based scraper that collects and organizes **English-taught Computer Science Master's programs** in Germany from the [DAAD (Deutscher Akademischer Austauschdienst)](https://www.daad.de/) database.
+A Python tool that aggregates **English-taught Master's programs in Germany** from the [DAAD (Deutscher Akademischer Austauschdienst)](https://www.daad.de/) — the official German government-backed database for international study programs.
+
+Instead of manually browsing programs one by one on the DAAD website, this tool **fetches all 1,000+ programs via the DAAD API**, analyzes their language requirements, and gives you everything in a categorized, color-coded Excel file.
 
 ## What It Does
 
-- Fetches Master's program listings from the DAAD international programmes database
-- Extracts detailed information for each program (university, city, duration, tuition, deadlines)
-- Analyzes language requirements — flags whether **IELTS is required** and whether **Medium of Instruction (MOI)** certificates are accepted
-- Exports everything to a **color-coded, categorized Excel file** with separate sheets per category (Data Science & AI, Cybersecurity, Software Engineering, etc.)
+1. **Fetches all program listings** from the DAAD API (structured JSON data)
+2. **Analyzes detail pages** for each program to extract language requirements not available through the API
+3. **Flags key info** — whether **IELTS is required** and whether **MOI (Medium of Instruction)** certificates are accepted
+4. **Categorizes programs** by field (Data Science & AI, Cybersecurity, Software Engineering, etc.)
+5. **Exports** to a color-coded Excel file with separate sheets per category
+
+## How It Works
+
+| Step | Method | What happens |
+|------|--------|-------------|
+| Fetch program listings | **DAAD JSON API** | Gets structured data (name, university, city, tuition, duration) for all matching programs |
+| Analyze language requirements | **HTML parsing** | Visits each program's detail page to extract IELTS, MOI, and deadline info not available in the API |
+| Categorize & export | **pandas + openpyxl** | Groups programs by field, applies color-coding, and exports to Excel |
+
+> **Why Germany only?** DAAD is Germany's official academic exchange portal. The API endpoint is under `/deutschland/` and exclusively lists programs offered at German universities.
 
 ## Project Structure
 
 ```
 German-MS/
 ├── src/
-│   ├── scrape_daad_api.py      # Main scraper (DAAD API + detail pages)
-│   ├── scrape_daad.py           # Alternative HTML-based scraper
-│   └── organize_programs.py     # Categorizer & Excel formatter
+│   ├── scrape_daad_api.py       # Fetches programs from DAAD API + analyzes detail pages
+│   └── organize_programs.py     # Categorizes programs & formats Excel output
 ├── tests/
 │   └── test_api.py              # DAAD API endpoint tester
 ├── output/                      # Generated Excel files (git-ignored)
@@ -25,57 +37,46 @@ German-MS/
 └── README.md
 ```
 
-## Scripts
-
-| Script | Description |
-|--------|-------------|
-| `src/scrape_daad_api.py` | **Main scraper** — uses the DAAD JSON API to fetch programs, then scrapes detail pages for language requirements. Outputs to `output/` |
-| `src/scrape_daad.py` | **Alternative scraper** — uses HTML scraping instead of the API for the search results page |
-| `src/organize_programs.py` | **Post-processor** — reads the scraped Excel file, categorizes programs by field, applies color-coding and formatting |
-| `tests/test_api.py` | **API tester** — quick script to test the DAAD API endpoint and inspect the response structure |
-
 ## Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/daad-german-masters-scraper.git
-cd daad-german-masters-scraper
+git clone https://github.com/<your-username>/daad-german-masters-finder.git
+cd daad-german-masters-finder
 
-# Install dependencies
 pip install -r requirements.txt
 ```
 
 ## Usage
 
 ```bash
-# Step 1: Scrape programs from DAAD
+# Step 1: Fetch programs from DAAD API
 python src/scrape_daad_api.py
 
 # Step 2: Organize and categorize the results
 python src/organize_programs.py
 ```
 
-The scraper will ask how many programs to process. Enter a number or type `all` to process everything.
+The tool will ask how many programs to process. Enter a number or type `all` to process everything.
 
 ## Output
 
 Generated files are saved to the `output/` folder:
 
-- `german_cs_masters_programs.xlsx` — Raw scraped data with all program details
+- `german_cs_masters_programs.xlsx` — All program data with language requirement analysis
 - `german_cs_masters_programs_organized.xlsx` — Categorized and color-coded version with:
   - **All Programs** overview sheet (sorted by category)
-  - Individual sheets for each category (Data Science & AI, Cybersecurity, Software Engineering, etc.)
+  - Individual sheets per category (Data Science & AI, Cybersecurity, Software Engineering, etc.)
   - Color-coded rows, formatted headers, frozen panes
 
-## API Used
+## API
 
-This project uses the **DAAD International Programmes API** — a public, unauthenticated JSON endpoint:
+This project uses the **DAAD International Programmes API** — a public JSON endpoint:
 
 ```
 https://www2.daad.de/deutschland/studienangebote/international-programmes/api/solr/en/search.json
 ```
 
-**No API keys are required.** The endpoint is publicly accessible.
+**No API keys required.** The endpoint is publicly accessible. Detail pages are parsed for additional language requirement info not available through the API.
 
 ## Dependencies
 
